@@ -95,3 +95,79 @@ I would consider extracting a dedicated Leave Service when:
 * The leave module becomes a bottleneck for the rest of the system.
 
 Splitting too early introduces distributed transactions, network latency, service discovery, API versioning, duplicate data synchronization, and eventual consistency challenges before the benefits outweigh the added complexity.
+
+
+## Product & Engineering Judgment
+
+### Scenario A – The Quick Win
+
+#### Risks
+
+Simply changing an approved leave request back to `PENDING` introduces serious data integrity issues:
+
+* The employee's annual leave balance would remain deducted unless manually restored.
+* Payroll may have already consumed the approval event, leading to incorrect salary calculations.
+* Notifications already sent to employees and managers would become inaccurate.
+* The audit trail would no longer accurately reflect the sequence of actions.
+* The system could end up in an inconsistent state where different services have conflicting information.
+
+In a production environment, this could result in compliance issues and incorrect HR records.
+
+#### Recommendation
+
+I would explain to the Product Manager that changing only the status creates technical debt and risks corrupting business data. Instead of modifying existing state, I would recommend implementing a proper **Cancel Approved Leave** workflow that:
+
+* Restores the leave balance.
+* Records an immutable audit entry.
+* Notifies downstream systems (Payroll, Notifications).
+* Marks the request as `CANCELLED` instead of reverting it to `PENDING`.
+
+Although this requires more engineering effort, it preserves system integrity.
+
+#### What I Would Ship for the Demo
+
+For a demo environment, I would implement a clearly labeled **Demo Only** action that:
+
+* Is available only in non-production environments.
+* Changes the status while displaying a warning that balance restoration, payroll integration, and notifications are not part of the demonstration.
+* Cannot be enabled in production through configuration.
+
+This allows the sales demo to proceed without introducing production risk.
+
+#### What I Would Refuse to Ship
+
+I would refuse to deploy a production feature that simply changes an approved leave request back to `PENDING` without:
+
+* Restoring leave balance.
+* Recording an audit trail.
+* Handling payroll implications.
+* Notifying dependent systems.
+
+Shipping a shortcut that knowingly compromises data integrity would create operational risk and could undermine trust in the HR platform.
+
+
+### Scenario B – Consistency vs Performance
+
+#### Tradeoffs
+
+Reading the leave balance directly from the database guarantees that users always see the latest value, but each request incurs an additional database query (approximately 80 ms). As traffic grows, this increases database load and response time.
+
+Caching the balance in Redis reduces read latency significantly (approximately 5 ms) and decreases database load. However, cached data may be stale for up to 60 seconds, meaning users could temporarily see an incorrect leave balance immediately after an approval or cancellation.
+
+#### Recommendation
+
+For an HR and payroll-adjacent system, I would prioritize **strong consistency** over maximum performance. Leave balances affect employee entitlements and payroll calculations, so displaying stale data could lead to incorrect business decisions and reduced user trust.
+
+Therefore, I would use the database as the source of truth for balance-related operations and user-facing screens where accuracy is critical.
+
+#### Mitigating the Downside
+
+To reduce the performance impact while maintaining consistency, I would:
+
+* Ensure proper indexing on employee and leave-related tables.
+* Use connection pooling to optimize database access.
+* Cache only non-critical reference data (e.g., leave policies) rather than transactional balances.
+* If Redis is introduced, use a **cache-aside** strategy with immediate cache invalidation or update whenever a leave approval or cancellation commits successfully, instead of relying solely on a fixed 60-second TTL.
+* Continuously monitor database latency, cache hit rate, and API response times to determine when further optimization is required.
+
+This approach provides accurate leave balances while still allowing caching to improve performance where eventual consistency is acceptable.

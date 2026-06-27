@@ -25,10 +25,10 @@ async function seed() {
 
         await pool.query(sql);
 
-        console.log(`✅ ${file} completed`);
+        console.log(`${file} completed`);
     }
 
-    console.log("🎉 Database seeded successfully.");
+    console.log("Database seeded successfully.");
 
     await pool.end();
 }
