@@ -170,6 +170,15 @@ class LeaveRequestService {
             tenantId
         );
     }
+
+    // List Leave Requests
+    async getLeaveRequests(filters, tenantId) {
+
+        return await this.leaveRequestRepository.getLeaveRequests(
+            filters, tenantId
+        );
+
+    }
 }
 
 export default new LeaveRequestService();

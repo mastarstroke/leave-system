@@ -34,7 +34,7 @@ class LeaveRequestController {
 
         return res.status(200).json(result);
     }
-    
+
 
     // Reject Leave Request
     async rejectLeaveRequest(req, res) {
@@ -50,6 +50,26 @@ class LeaveRequestController {
         return res.status(200).json({
             success: true,
             message: "Leave request rejected successfully.",
+            data: result
+        });
+    }
+
+    // List Leave Requests
+    async getLeaveRequests(req, res) {
+
+        const filters = {
+            status: req.query.status,
+            employeeId: req.query.employeeId
+        };
+
+        const result =
+            await LeaveRequestService.getLeaveRequests(
+                filters,
+                req.tenantId
+            );
+
+        return res.status(200).json({
+            success: true,
             data: result
         });
     }

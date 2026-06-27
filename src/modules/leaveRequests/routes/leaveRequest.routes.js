@@ -34,7 +34,8 @@ router.post(
 //  access  Private
 router.get(
     "/",
-    asyncHandler(LeaveRequestController.listLeaveRequests)
+    asyncHandler(LeaveRequestController.getLeaveRequests)
 );
+
 
 export default router;

@@ -147,7 +147,7 @@ class LeaveRequestRepository extends BaseRepository {
 
     // Find a leave request by ID
     async findById(id, tenantId) {
-        
+
         const query = `SELECT * FROM leave_requests
             WHERE id = $1 AND tenant_id = $2 LIMIT 1;
         `;
@@ -157,6 +157,48 @@ class LeaveRequestRepository extends BaseRepository {
         ]);
 
         return rows[0] ?? null;
+    }
+
+    // List leave requests with optional filters
+    async getLeaveRequests(filters, tenantId) {
+
+        let query = `
+            SELECT
+                id,
+                employee_id,
+                leave_type,
+                status,
+                start_date,
+                end_date,
+                reason,
+                approved_by,
+                approved_at,
+                rejected_comment,
+                created_at
+            FROM leave_requests
+            WHERE tenant_id = $1
+        `;
+
+        const params = [tenantId];
+        let index = 2;
+
+        if (filters.status) {
+            query += ` AND status = $${index}`;
+            params.push(filters.status);
+            index++;
+        }
+
+        if (filters.employeeId) {
+            query += ` AND employee_id = $${index}`;
+            params.push(filters.employeeId);
+            index++;
+        }
+
+        query += `
+            ORDER BY created_at DESC;
+        `;
+
+        return await this.query(query, params);
     }
 }
 
