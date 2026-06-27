@@ -1,5 +1,5 @@
 import pool from "../../../config/database.js";
-import BaseRepository from "./baseRepository.js";
+import BaseRepository from "../../BaseRepository.js";
 
 class LeaveRequestRepository extends BaseRepository {
 

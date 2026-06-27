@@ -5,6 +5,7 @@ import morgan from "morgan";
 
 // import leaveRequestRoutes from "./modules/leaveRequests/routes/leaveRequest.routes.js";
 import leaveRequestModule from "./modules/leaveRequests/index.js";
+import employeeRoutes from "./modules/employees/routes/employee.routes.js";
 
 
 import tenantMiddleware from "./middleware/tenant.middleware.js";
@@ -45,6 +46,8 @@ app.get("/health", (req, res) => {
 
 // Routes
 app.use("/api/v1/leave-requests", tenantMiddleware, leaveRequestModule);
+
+app.use("/api/v1/employees", employeeRoutes);
 
 
 // 404 Handler
