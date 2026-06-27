@@ -15,11 +15,15 @@ CREATE TABLE leave_requests (
 
     reason TEXT,
 
-    approved_by UUID,
-
+    approved_by VARCHAR(100),
+    
     approved_at TIMESTAMP,
 
-    rejected_comment TEXT,
+    rejected_by VARCHAR(100),
+
+    rejected_at TIMESTAMP,
+
+    rejected_comment TEXT
 
     created_at TIMESTAMP DEFAULT NOW(),
 

@@ -1,12 +1,14 @@
 {
-  "name": "leave-management-api",
+  "name": "PeopleFlow",
   "version": "1.0.0",
-  "description": "Leave Management API",
+  "description": "PeopleFlow Leave Management API",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
