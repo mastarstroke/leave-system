@@ -136,6 +136,40 @@ class LeaveRequestService {
             tenantId
         );
     }
+
+    // reject Leave Request
+    async rejectLeaveRequest(
+        leaveRequestId,
+        comment,
+        tenantId
+    ) {
+
+        if (!comment || !comment.trim()) {
+            throw new Error("Rejection comment is required.");
+        }
+
+        const leaveRequest =
+            await this.leaveRequestRepository.findById(
+                leaveRequestId,
+                tenantId
+            );
+
+        if (!leaveRequest) {
+            throw new Error("Leave request not found.");
+        }
+
+        if (leaveRequest.status !== "PENDING") {
+            throw new Error(
+                `Cannot reject a ${leaveRequest.status.toLowerCase()} leave request.`
+            );
+        }
+
+        return await this.leaveRequestRepository.rejectLeaveRequest(
+            leaveRequestId,
+            comment,
+            tenantId
+        );
+    }
 }
 
 export default new LeaveRequestService();

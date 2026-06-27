@@ -116,6 +116,48 @@ class LeaveRequestRepository extends BaseRepository {
 
         return rows[0];
     }
+
+    // Reject a leave request
+    async rejectLeaveRequest(
+        leaveRequestId,
+        comment,
+        tenantId
+    ) {
+
+        const query = `
+            UPDATE leave_requests
+            SET
+                status = 'REJECTED',
+                rejected_comment = $1,
+                updated_at = NOW()
+            WHERE
+                id = $2
+                AND tenant_id = $3
+            RETURNING *;
+        `;
+
+        const rows = await this.query(query, [
+            comment,
+            leaveRequestId,
+            tenantId
+        ]);
+
+        return rows[0];
+    }
+
+    // Find a leave request by ID
+    async findById(id, tenantId) {
+        
+        const query = `SELECT * FROM leave_requests
+            WHERE id = $1 AND tenant_id = $2 LIMIT 1;
+        `;
+
+        const rows = await this.query(query, [
+            id, tenantId
+        ]);
+
+        return rows[0] ?? null;
+    }
 }
 
 export default new LeaveRequestRepository();
